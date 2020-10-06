@@ -2,9 +2,7 @@ const vscode = require('vscode')
 const camelCase = require('lodash.camelcase')
 
 const pascalCase = text => {
-  console.log('text', text)
   const camelified = camelCase(text)
-  console.log('camelified', camelified)
   return camelified[0].toUpperCase() + camelified.slice(1)
 }
 
@@ -18,11 +16,7 @@ const getIndexOfFirstListBelowImports = lines => {
   }
 }
 
-const updatedRequireLine = moduleName => line => {
-  return line.replace(/:.*$/, `: ${moduleName},`)
-}
-
-module.exports = async (textEditor) => {
+const convert = async (textEditor, transformModuleName) => {
   const { line: cursorLineNum } = textEditor._selections[0].active
   const lines = textEditor._documentData._lines
   const requireLine = lines[cursorLineNum]
@@ -37,7 +31,7 @@ module.exports = async (textEditor) => {
   const moduleFilename = moduleFilepath.split('/').slice(-1)[0]
   console.log('moduleFilename', moduleFilename)
   console.log('moduleFilepath', moduleFilepath)
-  const moduleName = pascalCase(moduleFilename)
+  const moduleName = transformModuleName(moduleFilename)
   console.log('moduleName', moduleName)
 
   const requireStart = new vscode.Position(cursorLineNum, 0)
@@ -45,7 +39,7 @@ module.exports = async (textEditor) => {
   const requireRange = new vscode.Range(requireStart, requireEnd)
   console.log('requireRange', requireRange)
 
-  const updatedRequireLine = requireLine.replace(/:.*$/, `: ${moduleName},`)
+  const updatedRequireLine = requireLine.replace(/: require.*$/, `: ${moduleName},`)
 
   const index = getIndexOfFirstListBelowImports(lines)
   const newImportLinePosition = new vscode.Position(index - 1, 0)
@@ -56,4 +50,9 @@ module.exports = async (textEditor) => {
     editBuilder.replace(requireRange, updatedRequireLine)
     editBuilder.insert(newImportLinePosition, `import ${moduleName} from '${moduleFilepath}'\n`)
   })
+}
+
+module.exports = {
+  convertCamelCase: textEditor => convert(textEditor, camelCase),
+  convertPascalCase: textEditor => convert(textEditor, pascalCase),
 }
