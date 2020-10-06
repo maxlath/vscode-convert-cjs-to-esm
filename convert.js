@@ -28,8 +28,8 @@ const convert = async (textEditor, transformModuleName) => {
   }
   const moduleFilepath = requireFilepathMatch[2]
   const moduleFilename = moduleFilepath.split('/').slice(-1)[0]
-  console.log('moduleFilename', moduleFilename)
-  console.log('moduleFilepath', moduleFilepath)
+    .replace('.hbs', 'Template')
+
   const moduleName = transformModuleName(moduleFilename)
 
   const requireStart = new vscode.Position(cursorLineNum, 0)
