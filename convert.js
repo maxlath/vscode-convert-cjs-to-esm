@@ -12,7 +12,7 @@ const getIndexOfFirstListBelowImports = lines => {
   while (lines.length > 0) {
     index++
     const nextLine = lines.shift()
-    if (!nextLine.startsWith('import')) return index
+    if (!nextLine.startsWith('import')) return { index, isEmptyLine: nextLine.trim() === '' }
   }
 }
 
@@ -41,14 +41,15 @@ const convert = async (textEditor, transformModuleName) => {
 
   const updatedRequireLine = requireLine.replace(/: require.*$/, `: ${moduleName},`)
 
-  const index = getIndexOfFirstListBelowImports(lines)
-  const newImportLinePosition = new vscode.Position(index - 1, 0)
-  console.log('newImportLinePosition', newImportLinePosition)
+  const { index, isEmptyLine } = getIndexOfFirstListBelowImports(lines)
+  const newImportLinePosition = new vscode.Position(Math.max(index - 1, 0), 0)
+  let addedImportLine = `import ${moduleName} from '${moduleFilepath}'\n`
+  if (!isEmptyLine) addedImportLine += '\n'
 
   vscode.window.activeTextEditor.edit(editBuilder => {
     console.log('editBuilder', editBuilder)
     editBuilder.replace(requireRange, updatedRequireLine)
-    editBuilder.insert(newImportLinePosition, `import ${moduleName} from '${moduleFilepath}'\n`)
+    editBuilder.insert(newImportLinePosition, addedImportLine)
   })
 }
 
