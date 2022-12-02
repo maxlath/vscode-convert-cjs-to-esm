@@ -1,5 +1,7 @@
 # vscode-convert-cjs-to-esm
 
+**[2022 update]: [vscode now natively offers a refactor to do that](https://stackoverflow.com/questions/69441892/how-to-refactor-all-cjs-files-to-es6-modules-in-all-files-of-a-project-or-direct), so this extension is unnecessary**
+
 A VSCode/[VSCodium](https://vscodium.com) extension to convert CommonJS `require` to a ESM static `import`:
 
 To easily go from:
